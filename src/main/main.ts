@@ -97,10 +97,6 @@ const createWindow = async () => {
 	new AppUpdater();
 };
 
-/**
- * 事件监听器
- */
-
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit();

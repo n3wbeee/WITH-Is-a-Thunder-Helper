@@ -3,7 +3,7 @@ import { useState } from 'react';
 import close from '../../assets/icons/close.svg';
 import maximize from '../../assets/icons/maximize.svg';
 import minimize from '../../assets/icons/minimize.svg';
-import './App.css';
+import './AppComplied.css';
 
 function Sidebar() {
 	const [activeButton, setActiveButton] = useState('test');
@@ -18,29 +18,21 @@ function Sidebar() {
 		onClick?: () => void;
 	}) {
 		return (
-			<div className="buttonOutside">
-				<div
-					className="buttonInside"
-					onClick={onClick}
-					id={text}
-					style={
-						activeButton === text
-							? {
-									background: 'rgba(159, 212, 253, 1)',
-									boxShadow:
-										'0px 0px 4px 1px rgba(159, 212, 253, 0.5)',
-								}
-							: {}
-					}
-				>
-					<p className="buttonText">{text}</p>
-				</div>
+			<div
+				className={`w-full h-12 rounded-xl select-none flex items-center p-4 transition-colors cursor-pointer
+				${activeButton === text ? 'bg-blue-500 text-neutral-100' : 'hover:bg-blue-400 hover:text-neutral-100'}
+				active:bg-blue-600
+				`}
+				onClick={onClick}
+				id={text}
+			>
+				{text}
 			</div>
 		);
 	}
 
 	return (
-		<div className="sidebar">
+		<div className="w-48 h-full bg-neutral-50 flex flex-col items-center p-4 gap-4">
 			<Button
 				text="test"
 				activeButton={activeButton}
@@ -57,20 +49,30 @@ function Sidebar() {
 
 function Navbar() {
 	return (
-		<div className="navbar">
+		<div
+			className="h-8 bg-neutral-50 flex flex-row justify-end items-center"
+			// 窗口拖拽
+			style={{ WebkitAppRegion: 'drag' } as any}
+		>
 			<div
-				className="messageIconBox"
+				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer"
+				style={{ WebkitAppRegion: 'no-drag' } as any}
 				onClick={window.electron.minimizeApp}
 			>
 				<img src={minimize} />
 			</div>
 			<div
-				className="messageIconBox"
+				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer"
+				style={{ WebkitAppRegion: 'no-drag' } as any}
 				onClick={window.electron.maximizeApp}
 			>
 				<img src={maximize} />
 			</div>
-			<div className="closeIconBox" onClick={window.electron.closeApp}>
+			<div
+				className="w-12 h-8 flex justify-center items-center hover:bg-red-400 cursor-pointer"
+				style={{ WebkitAppRegion: 'no-drag' } as any}
+				onClick={window.electron.closeApp}
+			>
 				<img src={close} />
 			</div>
 		</div>
@@ -81,10 +83,13 @@ function MainPage() {
 	return (
 		<>
 			<Sidebar />
-			<div className="verticalLine" />
-			<div className="mainPage">
+			<div className="bg-neutral-200 w-px h-full" />
+			{/* 左侧主页面 */}
+			<div className="flex flex-col flex-1 justify-start bg-neutral-100">
 				<Navbar />
-				<div className="horizonalLine" />
+				<div className="bg-neutral-200 w-full h-px" />
+
+				{/* 内容区 */}
 			</div>
 		</>
 	);
