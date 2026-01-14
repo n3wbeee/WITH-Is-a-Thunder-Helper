@@ -1,13 +1,15 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { useEffect } from 'react';
+import Link from './subpage/link';
+
+import { useEffect, useState } from 'react';
 
 import close from '../../assets/icons/close.svg';
 import maximize from '../../assets/icons/maximize.svg';
 import minimize from '../../assets/icons/minimize.svg';
 
-import './AppComplied.css';
+import './styleComplied.css';
 
 function Sidebar() {
 	let navigate = useNavigate();
@@ -39,6 +41,11 @@ function Sidebar() {
 	return (
 		<div className="w-48 h-full bg-neutral-50 flex flex-col items-center p-4 gap-4">
 			<Button
+				text="连接"
+				status={location.pathname === '/link'}
+				onClick={() => navigate('/link')}
+			/>
+			<Button
 				text="规则"
 				status={location.pathname === '/rule'}
 				onClick={() => navigate('/rule')}
@@ -60,23 +67,23 @@ function Navbar() {
 			style={{ WebkitAppRegion: 'drag' } as any}
 		>
 			<div
-				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer"
+				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.electron.minimizeApp}
+				onClick={window.windowHandler.minimizeApp}
 			>
 				<img src={minimize} />
 			</div>
 			<div
-				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer"
+				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.electron.maximizeApp}
+				onClick={window.windowHandler.maximizeApp}
 			>
 				<img src={maximize} />
 			</div>
 			<div
-				className="w-12 h-8 flex justify-center items-center hover:bg-red-400 cursor-pointer"
+				className="w-12 h-8 flex justify-center items-center hover:bg-red-400 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.electron.closeApp}
+				onClick={window.windowHandler.closeApp}
 			>
 				<img src={close} />
 			</div>
@@ -85,10 +92,23 @@ function Navbar() {
 }
 
 function Rule() {
+	function TriggerCard() {
+		return (
+			<div className="h-24 rounded-2xl shrink-0 shadow bg-neutral-50"></div>
+		);
+	}
+
 	return (
-		<div className="flex flex-1 ">
-			<div className="w-48"></div>
+		<div className="flex flex-1 h-full overflow-auto">
+			{/* 规则触发器 */}
+			<div className="w-64 h-full gap-4 p-4 overflow-auto flex flex-col">
+				<TriggerCard />
+				<TriggerCard />
+			</div>
+
 			<div className="bg-neutral-200 w-px h-full"></div>
+
+			{/* 规则内容区 */}
 			<div className="flex-1"></div>
 		</div>
 	);
@@ -102,7 +122,7 @@ function MainPage() {
 	let navigate = useNavigate();
 
 	useEffect(() => {
-		navigate('/rule');
+		navigate('/link');
 	}, []);
 
 	return (
@@ -110,12 +130,13 @@ function MainPage() {
 			<Sidebar />
 			<div className="bg-neutral-200 w-px h-full" />
 			{/* 左侧主页面 */}
-			<div className="flex flex-col flex-1 justify-start bg-neutral-100">
+			<div className="flex flex-col flex-1 h-full justify-start bg-neutral-100">
 				<Navbar />
 				<div className="bg-neutral-200 w-full h-px" />
 
 				{/* 内容区 */}
 				<Routes>
+					<Route path="/link" element={<Link />} />
 					<Route path="/rule" element={<Rule />} />
 					<Route path="/setting" element={<Setting />} />
 				</Routes>

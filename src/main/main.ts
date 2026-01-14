@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, Tray, ipcMain, Menu } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
@@ -23,6 +23,7 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
 
 if (process.env.NODE_ENV === 'production') {
 	const sourceMapSupport = require('source-map-support');
@@ -67,6 +68,8 @@ const createWindow = async () => {
 		frame: false,
 		width: 1024,
 		height: 728,
+		minWidth: 768,
+		minHeight: 546,
 		icon: getAssetPath('icon.png'),
 		webPreferences: {
 			preload: app.isPackaged
@@ -85,6 +88,34 @@ const createWindow = async () => {
 			mainWindow.minimize();
 		} else {
 			mainWindow.show();
+
+			const trayMenu = Menu.buildFromTemplate([
+				{
+					label: '显示主页',
+					click: () => {
+						if (mainWindow) {
+							mainWindow.show();
+						}
+					},
+				},
+				{
+					label: '退出',
+					click: () => {
+						app.quit();
+					},
+				},
+			]);
+
+			tray = new Tray(getAssetPath('icon.png'));
+			// TODO 记得改个名字
+			tray.setToolTip('8111 tool for coyote');
+			tray.setContextMenu(trayMenu);
+
+			tray.on('double-click', () => {
+				if (mainWindow) {
+					mainWindow.show();
+				}
+			});
 		}
 	});
 
@@ -107,7 +138,7 @@ app.whenReady()
 	.then(() => {
 		ipcMain.on('close-app', () => {
 			if (mainWindow) {
-				mainWindow.close();
+				mainWindow.hide();
 			}
 		});
 		ipcMain.on('minimize-app', () => {
@@ -116,6 +147,24 @@ app.whenReady()
 			}
 		});
 		ipcMain.on('maximize-app', () => {
+			// fetch(
+			// 	isDebug
+			// 		? 'http://127.0.0.1:4523/m1/7705341-7448087-default/state'
+			// 		: 'localhost:8111/state',
+			// )
+			// 	.then((response) => {
+			// 		if (!response.ok) throw new Error('网络响应错误');
+			// 		return response.json();
+			// 	})
+			// 	.then((data) => {
+			// 		mainWindow?.webContents.send('update-state', data);
+			// 		console.log(data);
+			// 	})
+			// 	.catch((error) => {
+			// 		mainWindow?.webContents.send('update-state', null);
+			// 		console.error(error);
+			// 	});
+
 			if (mainWindow) {
 				if (mainWindow.isMaximized()) {
 					mainWindow.unmaximize();
@@ -126,5 +175,25 @@ app.whenReady()
 		});
 
 		createWindow();
+
+		setInterval(() => {
+			fetch(
+				isDebug
+					? 'http://127.0.0.1:4523/m1/7705341-7448087-default/state'
+					: 'http://localhost:8111/state',
+			)
+				.then((response) => {
+					if (!response.ok) throw new Error('网络响应错误');
+					return response.json();
+				})
+				.then((data) => {
+					mainWindow?.webContents.send('update-state', data);
+					console.log(data);
+				})
+				.catch((error) => {
+					mainWindow?.webContents.send('update-state', null);
+					console.error(error);
+				});
+		}, 1000);
 	})
 	.catch(console.log);

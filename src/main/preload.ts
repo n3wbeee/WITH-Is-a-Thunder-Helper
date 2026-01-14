@@ -1,15 +1,26 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { on } from 'events';
 
 export type Channels = 'ipc-example';
 
-const electronHandler = {
+const windowHandler = {
 	closeApp: () => ipcRenderer.send('close-app'),
 	minimizeApp: () => ipcRenderer.send('minimize-app'),
 	maximizeApp: () => ipcRenderer.send('maximize-app'),
 };
 
-contextBridge.exposeInMainWorld('electron', electronHandler);
+const dataHandler = {
+	onUpdateState: (callback: (data: any) => void) => {
+		ipcRenderer.on('update-state', (event: IpcRendererEvent, data: any) => {
+			callback(data);
+		});
+	},
+};
 
-export type ElectronHandler = typeof electronHandler;
+contextBridge.exposeInMainWorld('windowHandler', windowHandler);
+contextBridge.exposeInMainWorld('data', dataHandler);
+
+export type WindowHandler = typeof windowHandler;
+export type DataHandler = typeof dataHandler;

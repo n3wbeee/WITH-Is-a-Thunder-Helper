@@ -1,0 +1,33 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	height: 100vh;
+	display: flex;
+
+	justify-content: flex-start;
+}
+
+#root {
+	display: flex;
+	flex-grow: 1;
+}
+
+::-webkit-scrollbar {
+	width: 0.5rem; /* 滚动条的宽度 */
+}
+
+::-webkit-scrollbar-track {
+	opacity: 0;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgb(212, 212, 212);
+	border-radius: 0.25rem;
+}
