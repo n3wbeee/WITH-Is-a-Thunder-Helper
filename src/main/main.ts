@@ -13,10 +13,11 @@ import { app, BrowserWindow, Tray, ipcMain, Menu } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
-import WebSocket from 'ws';
+import { WebSocketManager } from './websocket';
 
 const os = require('os');
-const ws = new WebSocket.Server({ port: 1314 });
+
+let wsManager: WebSocketManager;
 
 class AppUpdater {
 	constructor() {
@@ -111,8 +112,7 @@ const createWindow = async () => {
 			]);
 
 			tray = new Tray(getAssetPath('icon.png'));
-			// TODO 记得改个名字
-			tray.setToolTip('8111 tool for coyote');
+			tray.setToolTip('WITH');
 			tray.setContextMenu(trayMenu);
 
 			tray.on('double-click', () => {
@@ -132,7 +132,7 @@ const createWindow = async () => {
 	new AppUpdater();
 };
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
 	if (process.platform !== 'darwin') {
 		app.quit();
 	}
@@ -140,6 +140,9 @@ app.on('window-all-closed', () => {
 
 app.whenReady()
 	.then(() => {
+		// 初始化 WebSocket 服务器
+		wsManager = new WebSocketManager(1314);
+
 		ipcMain.on('close-app', () => {
 			if (mainWindow) {
 				mainWindow.hide();
@@ -177,24 +180,24 @@ app.whenReady()
 
 		createWindow();
 
-		setInterval(() => {
-			fetch(
-				isDebug
-					? 'http://127.0.0.1:4523/m1/7705341-7448087-default/state'
-					: 'http://localhost:8111/state',
-			)
-				.then((response) => {
-					if (!response.ok) throw new Error('网络响应错误');
-					return response.json();
-				})
-				.then((data) => {
-					mainWindow?.webContents.send('update-state', data);
-					console.log(data);
-				})
-				.catch((error) => {
-					mainWindow?.webContents.send('update-state', null);
-					console.error(error);
-				});
-		}, 1000);
+		// setInterval(() => {
+		// 	fetch(
+		// 		isDebug
+		// 			? 'http://127.0.0.1:4523/m1/7705341-7448087-default/state'
+		// 			: 'http://localhost:8111/state',
+		// 	)
+		// 		.then((response) => {
+		// 			if (!response.ok) throw new Error('网络响应错误');
+		// 			return response.json();
+		// 		})
+		// 		.then((data) => {
+		// 			mainWindow?.webContents.send('update-state', data);
+		// 			console.log(data);
+		// 		})
+		// 		.catch((error) => {
+		// 			mainWindow?.webContents.send('update-state', null);
+		// 			console.error(error);
+		// 		});
+		// }, 250);
 	})
 	.catch(console.log);

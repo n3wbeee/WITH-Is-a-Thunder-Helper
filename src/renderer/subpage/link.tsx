@@ -33,9 +33,11 @@ function WarthunderPage({ stateData }: { stateData: any }) {
 			)}
 
 			{!stateData && (
-				<div className="flex flex-1 flex-col justify-center items-center">
+				<div className="flex flex-1 flex-col justify-center items-center select-none">
 					<img src={lostConnect} />
-					<p className="text-neutral-400 text-lg">未连接到战争雷霆</p>
+					<p className="text-neutral-400 text-lg select-none">
+						未连接到战争雷霆
+					</p>
 				</div>
 			)}
 
@@ -74,7 +76,10 @@ function CoyotePage({ localIP }: { localIP: string }) {
 		<>
 			<QRCodeSVG value={url} bgColor="#F5F5F5" />
 			<p className="text-neutral-400 text-lg select-none">
-				扫码链接WebSocket
+				扫码链接 WebSocket
+			</p>
+			<p className="text-neutral-400 text select-none">
+				服务器地址：{localIP}
 			</p>
 		</>
 	);
@@ -86,7 +91,6 @@ function Link() {
 
 	useEffect(() => {
 		window.network.getLocalIP().then((localIP) => {
-			console.log(localIP);
 			setLocalIP(localIP);
 		});
 	}, []);
@@ -103,7 +107,7 @@ function Link() {
 
 			<div className="bg-neutral-200 w-px h-full" />
 
-			<div className="flex flex-1 flex-col gap-4 justify-center items-center">
+			<div className="flex flex-1 flex-col gap-2 justify-center items-center">
 				<CoyotePage localIP={localIP} />
 			</div>
 		</div>
