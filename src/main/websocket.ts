@@ -111,23 +111,41 @@ export class WebSocketManager {
 							if (this.onMessageFunc) this.onMessageFunc();
 							break;
 
-						case 'break':
-							ws.close();
+						case 'command':
+							switch (data.command) {
+								case 'setStrength':
+									if (this.isConnected) {
+										this.coyoteWs.send(
+											JSON.stringify({
+												type: 'msg',
+												clientId: this.clientID,
+												message:
+													'strength-' +
+													data.parameter,
+												targetId: this.targetID,
+											}),
+										);
+									}
+									break;
+
+								case 'setPulse':
+									if (this.isConnected) {
+										this.coyoteWs.send(
+											JSON.stringify({
+												type: 'msg',
+												clientId: this.clientID,
+												message:
+													'pulse-' + data.parameter,
+												targetId: this.targetID,
+											}),
+										);
+									}
+									break;
+							}
 							break;
 
-						case 'command':
-							if (this.isConnected) {
-								console.log(this.targetID, this.clientID);
-								this.coyoteWs.send(
-									JSON.stringify({
-										type: 'msg',
-										clientId: this.clientID,
-										message:
-											'pulse-A:["0A0A0A0A00000000","0A0A0A0A0A0A0A0A","0A0A0A0A14141414","0A0A0A0A1E1E1E1E","0A0A0A0A28282828","0A0A0A0A32323232","0A0A0A0A3C3C3C3C","0A0A0A0A46464646","0A0A0A0A50505050","0A0A0A0A5A5A5A5A","0A0A0A0A64646464"]',
-										targetId: this.targetID,
-									}),
-								);
-							}
+						case 'break':
+							ws.close();
 							break;
 
 						default:

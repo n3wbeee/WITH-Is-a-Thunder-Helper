@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import close from '../../assets/icons/close.svg';
 import maximize from '../../assets/icons/maximize.svg';
 import minimize from '../../assets/icons/minimize.svg';
+import logo from '../../assets/logo.png';
 
 import './styleComplied.css';
 
@@ -40,6 +41,10 @@ function Sidebar() {
 
 	return (
 		<div className="w-48 h-full bg-neutral-50 flex flex-col items-center p-4 gap-4">
+			<div className="w-full h-24 flex items-center justify-center">
+				<img src={logo} className="h-24 m-2" />
+			</div>
+
 			<Button
 				text="连接"
 				status={location.pathname === '/link'}
