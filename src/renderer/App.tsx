@@ -75,21 +75,27 @@ function Navbar() {
 			<div
 				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.windowHandler.minimizeApp}
+				onClick={() => {
+					window.windowHandler.minimizeApp();
+				}}
 			>
 				<img src={minimize} />
 			</div>
 			<div
 				className="w-12 h-8 flex justify-center items-center hover:bg-neutral-200 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.windowHandler.maximizeApp}
+				onClick={() => {
+					window.windowHandler.maximizeApp();
+				}}
 			>
 				<img src={maximize} />
 			</div>
 			<div
 				className="w-12 h-8 flex justify-center items-center hover:bg-red-400 cursor-pointer select-none"
 				style={{ WebkitAppRegion: 'no-drag' } as any}
-				onClick={window.windowHandler.closeApp}
+				onClick={() => {
+					window.windowHandler.closeApp();
+				}}
 			>
 				<img src={close} />
 			</div>
