@@ -1,4 +1,5 @@
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+const { v4: uuidv4 } = require('uuid');
 import { useState } from 'react';
 
 import save from '../../../assets/icons/save.svg';
@@ -6,17 +7,31 @@ import create from '../../../assets/icons/create.svg';
 
 import '../styleComplied.css';
 
-function TriggerCard() {
+function TriggerCard(item: any) {
 	return (
-		<div className="h-24 rounded-2xl m-4 shrink-0 shadow bg-neutral-50"></div>
+		<div className="h-24 rounded-2xl m-4 shrink-0 shadow bg-neutral-50">
+			<p className="select-none pl-2 pt-2 pb-1">{item.name}</p>
+			<div className="bg-neutral-200 w-full h-px" />
+		</div>
 	);
 }
 
 function Rule() {
 	const [items, setItems] = useState([
-		{ id: '1', content: 'Item 1' },
-		{ id: '2', content: 'Item 2' },
-		{ id: '3', content: 'Item 3' },
+		{
+			name: '规则1',
+			trigger: 'critical_ias',
+			action: [],
+			active: true,
+			id: uuidv4(),
+		},
+		{
+			name: '规则1',
+			trigger: 'critical_ias',
+			action: [],
+			active: true,
+			id: uuidv4(),
+		},
 	]);
 
 	const dragHandler = (result: any) => {
@@ -30,19 +45,22 @@ function Rule() {
 	};
 
 	return (
-		<div className="flex flex-1 h-full overflow-auto">
-			{/* 规则触发器 */}
-			<div className="w-64 h-full overflow-auto flex flex-col">
-				<div className="w-full h-8 flex items-center justify-end p-2 gap-2 bg-neutral-50">
-					<img src={save} className="cursor-pointer" />
-					<img src={create} className="cursor-pointer" />
-				</div>
-				<div className="bg-neutral-200 w-full h-px" />
-				<DragDropContext onDragEnd={dragHandler}>
+		<DragDropContext onDragEnd={dragHandler}>
+			<div className="flex flex-1 h-full overflow-hidden">
+				{/* 规则页 */}
+				<div className="w-64 h-full flex flex-col">
+					{/* 工具栏*/}
+					<div className="w-full h-8 flex items-center justify-end p-2 gap-2 bg-neutral-50">
+						<img src={save} className="cursor-pointer" />
+						<img src={create} className="cursor-pointer" />
+					</div>
+					<div className="bg-neutral-200 w-full h-px" />
+
+					{/* 规则卡片展示区 */}
 					<Droppable droppableId="rule-list">
 						{(provided, snapshot) => (
 							<div
-								className="flex flex-col flex-1"
+								className="flex flex-col flex-1 overflow-auto"
 								ref={provided.innerRef}
 								{...provided.droppableProps}
 							>
@@ -58,7 +76,7 @@ function Rule() {
 												{...provided.draggableProps}
 												{...provided.dragHandleProps}
 											>
-												<TriggerCard />
+												<TriggerCard {...item} />
 											</div>
 										)}
 									</Draggable>
@@ -67,13 +85,13 @@ function Rule() {
 							</div>
 						)}
 					</Droppable>
-				</DragDropContext>
+				</div>
+
+				<div className="bg-neutral-200 w-px h-full"></div>
+
+				<div className="flex-1"></div>
 			</div>
-
-			<div className="bg-neutral-200 w-px h-full"></div>
-
-			<div className="flex-1"></div>
-		</div>
+		</DragDropContext>
 	);
 }
 
