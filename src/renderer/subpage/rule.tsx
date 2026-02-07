@@ -4,14 +4,34 @@ import { useState } from 'react';
 
 import save from '../../../assets/icons/save.svg';
 import create from '../../../assets/icons/create.svg';
+import deleteIcon from '../../../assets/icons/delete.svg';
+import dragHandle from '../../../assets/icons/drag_handle.svg';
 
 import '../styleComplied.css';
 
-function TriggerCard(item: any) {
+function TriggerCard({
+	item,
+	dragHandleProps,
+}: {
+	item: any;
+	dragHandleProps: any;
+}) {
 	return (
-		<div className="h-24 rounded-2xl m-4 shrink-0 shadow bg-neutral-50">
-			<p className="select-none pl-2 pt-2 pb-1">{item.name}</p>
-			<div className="bg-neutral-200 w-full h-px" />
+		<div
+			className="h-16 rounded-2xl m-4 shrink-0 shadow flex items-center p-2 gap-2 bg-neutral-50 select-none transition-colors
+					 hover:bg-blue-200 "
+		>
+			<img src={deleteIcon} className="w-8 h-8 cursor-pointer" />
+			<div className="flex-1 h-full flex justify-center flex-col">
+				<p className="text-neutral-900 font-bold">{item.name}</p>
+				<p className="text-neutral-500 text-sm">{item.trigger}</p>
+			</div>
+			<div
+				className="w-6 h-full flex items-center justify-end cursor-grab active:cursor-grabbing"
+				{...dragHandleProps}
+			>
+				<img src={dragHandle} />
+			</div>
 		</div>
 	);
 }
@@ -26,8 +46,8 @@ function Rule() {
 			id: uuidv4(),
 		},
 		{
-			name: '规则1',
-			trigger: 'critical_ias',
+			name: '规则2',
+			trigger: 'airbrake_on',
 			action: [],
 			active: true,
 			id: uuidv4(),
@@ -74,9 +94,13 @@ function Rule() {
 											<div
 												ref={provided.innerRef}
 												{...provided.draggableProps}
-												{...provided.dragHandleProps}
 											>
-												<TriggerCard {...item} />
+												<TriggerCard
+													item={item}
+													dragHandleProps={
+														provided.dragHandleProps
+													}
+												/>
 											</div>
 										)}
 									</Draggable>
