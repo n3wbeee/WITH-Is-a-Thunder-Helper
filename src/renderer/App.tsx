@@ -1,5 +1,11 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import { useNavigate, useLocation } from 'react-router-dom';
+import {
+	createMemoryRouter,
+	RouterProvider,
+	Outlet,
+	useOutlet,
+	useNavigate,
+	useLocation,
+} from 'react-router-dom';
 
 import Link from './subpage/link';
 import Rule from './subpage/rule';
@@ -14,8 +20,8 @@ import logo from '../../assets/logo.png';
 import './styleComplied.css';
 
 function Sidebar() {
-	let navigate = useNavigate();
-	let location = useLocation();
+	const location = useLocation();
+	const navigate = useNavigate();
 
 	function Button({
 		text,
@@ -49,18 +55,28 @@ function Sidebar() {
 			<Button
 				text="连接"
 				status={location.pathname === '/link'}
-				onClick={() => navigate('/link')}
+				onClick={() => {
+					navigate('/link');
+				}}
 			/>
 			<Button
 				text="规则"
 				status={location.pathname === '/rule'}
-				onClick={() => navigate('/rule')}
+				onClick={() => {
+					navigate('/rule');
+				}}
 			/>
 		</div>
 	);
 }
 
 function Navbar() {
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		navigate('/link');
+	}, []);
+
 	return (
 		<div
 			className="h-8 bg-neutral-50 flex flex-row justify-end items-center"
@@ -98,13 +114,7 @@ function Navbar() {
 	);
 }
 
-function MainPage() {
-	let navigate = useNavigate();
-
-	useEffect(() => {
-		navigate('/link');
-	}, []);
-
+function Layout() {
 	return (
 		<>
 			<Sidebar />
@@ -115,19 +125,29 @@ function MainPage() {
 				<div className="bg-neutral-200 w-full h-px" />
 
 				{/* 内容页面 */}
-				<Routes>
-					<Route path="/link" element={<Link />} />
-					<Route path="/rule" element={<Rule />} />
-				</Routes>
+				<Outlet />
 			</div>
 		</>
 	);
 }
 
+const router = createMemoryRouter([
+	{
+		path: '/',
+		element: <Layout />,
+		children: [
+			{
+				path: 'link',
+				element: <Link />,
+			},
+			{
+				path: 'rule',
+				element: <Rule />,
+			},
+		],
+	},
+]);
+
 export default function App() {
-	return (
-		<Router>
-			<MainPage />
-		</Router>
-	);
+	return <RouterProvider router={router} />;
 }
