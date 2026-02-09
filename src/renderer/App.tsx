@@ -114,7 +114,7 @@ function MainPage() {
 				<Navbar />
 				<div className="bg-neutral-200 w-full h-px" />
 
-				{/* 内容区 */}
+				{/* 内容页面 */}
 				<Routes>
 					<Route path="/link" element={<Link />} />
 					<Route path="/rule" element={<Rule />} />
