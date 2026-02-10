@@ -29,7 +29,7 @@ function TriggerCard({
 }) {
 	return (
 		<div
-			className="h-16 rounded-2xl m-4 shrink-0 shadow relative flex group items-center p-2 gap-2 bg-neutral-50 select-none
+			className="h-16 rounded-2xl m-4 shrink-0 shadow relative flex group items-center p-2 pl-3 gap-2 bg-neutral-50 select-none
 			transition-colors hover:bg-blue-200"
 		>
 			<img src={edit} className="w-6 h-6 cursor-pointer" />
@@ -63,7 +63,8 @@ function TriggerCard({
 			{/* 删除图标 */}
 			<img
 				src={deleteIcon}
-				className="w-4 h-4 absolute	-right-1 -top-1 cursor-pointer invisible group-hover:visible"
+				className="w-4 h-4 absolute	-right-1 -top-1 cursor-pointer
+				transition-opacity opacity-0 group-hover:opacity-100"
 				onClick={() => onDelete(item.id)}
 			/>
 
@@ -79,23 +80,24 @@ function TriggerCard({
 }
 
 function RuleContent() {
-	const [items, setItems] = useState<Rule[]>([
-		{
-			name: '规则1',
-			trigger: 'onCriticalSpeed',
-			action: [],
-			id: uuidv4(),
-		},
-		{
-			name: '规则2',
-			trigger: 'onCriticalSpeed',
-			action: [],
-			id: uuidv4(),
-		},
-	]);
+	const [items, setItems] = useState<Rule[]>([]);
 
 	const initialItemsRef = useRef(JSON.stringify(items));
 	const [isDirty, setIsDirty] = useState(false);
+
+	// 组件加载时从文件读取规则
+	useEffect(() => {
+		const loadRules = async () => {
+			try {
+				const result = await window.fileHandler.loadRules();
+				if (result.success && result.data && result.data.length > 0) {
+					setItems(result.data);
+					initialItemsRef.current = JSON.stringify(result.data);
+				}
+			} catch (error) {}
+		};
+		loadRules();
+	}, []);
 
 	// 检测是否有未保存的更改
 	const checkForChanges = useCallback(() => {
@@ -124,17 +126,25 @@ function RuleContent() {
 
 	// 保存对话框相关
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const confirmSaveHandler = () => {
-		// 在这里添加保存逻辑
+	const confirmSaveHandler = async () => {
+		try {
+			// 保存规则到本地文件
+			const result = await window.fileHandler.saveRules(items);
+			if (result.success) {
+				// 保存成功后更新初始状态
+				initialItemsRef.current = JSON.stringify(items);
+				setIsDirty(false);
+				setIsDialogOpen(false);
 
-		// 保存成功后更新初始状态
-		initialItemsRef.current = JSON.stringify(items);
-		setIsDirty(false);
-		setIsDialogOpen(false);
-
-		// 如果是从路由拦截触发的，继续导航
-		if (blocker.state === 'blocked') {
-			blocker.proceed?.();
+				// 如果是从路由拦截触发的，继续导航
+				if (blocker.state === 'blocked') {
+					blocker.proceed?.();
+				}
+			} else {
+				alert('保存失败: ' + result.error);
+			}
+		} catch (error) {
+			alert('保存规则时出错');
 		}
 	};
 	const cancelSaveHandler = () => {

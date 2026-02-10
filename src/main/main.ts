@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { resolveHtmlPath } from './util';
 import { WebSocketManager } from './websocket';
+import fs from 'fs';
 
 const os = require('os');
 
@@ -192,6 +193,44 @@ app.whenReady()
 			return wsManager.getIsConnected();
 		});
 
+		// 获取规则文件路径
+		const getRulesFilePath = () => {
+			const userDataPath = app.getPath('userData');
+			return path.join(userDataPath, 'rules.json');
+		};
+
+		// 保存规则到本地文件
+		ipcMain.handle('save-rules', async (event, rules) => {
+			try {
+				const filePath = getRulesFilePath();
+
+				await fs.promises.writeFile(
+					filePath,
+					JSON.stringify(rules, null, 2),
+					'utf-8',
+				);
+				return { success: true };
+			} catch (error) {
+				console.error(error);
+				return { success: false, error: (error as Error).message };
+			}
+		});
+
+		// 从本地文件加载规则
+		ipcMain.handle('load-rules', async () => {
+			try {
+				const filePath = getRulesFilePath();
+				if (fs.existsSync(filePath)) {
+					const data = await fs.promises.readFile(filePath, 'utf-8');
+					return { success: true, data: JSON.parse(data) };
+				}
+				return { success: true, data: [] }; // 文件不存在时返回空数组
+			} catch (error) {
+				console.error(error);
+				return { success: false, error: (error as Error).message };
+			}
+		});
+
 		createWindow();
 
 		setInterval(() => {
@@ -212,6 +251,6 @@ app.whenReady()
 					mainWindow?.webContents.send('update-state', null);
 					console.error(error);
 				});
-		}, 250);
+		}, 100000);
 	})
 	.catch(console.log);

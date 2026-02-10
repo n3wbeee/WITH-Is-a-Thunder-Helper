@@ -4,6 +4,7 @@ import {
 	DataHandler,
 	NetworkHandler,
 	WebsocketHandler,
+	FileHandler,
 } from '../main/preload';
 
 declare global {
@@ -13,6 +14,7 @@ declare global {
 		data: DataHandler;
 		network: NetworkHandler;
 		websocket: WebsocketHandler;
+		fileHandler: FileHandler;
 	}
 }
 

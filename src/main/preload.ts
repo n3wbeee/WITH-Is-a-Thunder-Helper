@@ -48,12 +48,19 @@ const websocketHandler = {
 	},
 };
 
+const fileHandler = {
+	saveRules: (rules: any[]) => ipcRenderer.invoke('save-rules', rules),
+	loadRules: () => ipcRenderer.invoke('load-rules'),
+};
+
 contextBridge.exposeInMainWorld('windowHandler', windowHandler);
 contextBridge.exposeInMainWorld('data', dataHandler);
 contextBridge.exposeInMainWorld('network', networkHandler);
 contextBridge.exposeInMainWorld('websocket', websocketHandler);
+contextBridge.exposeInMainWorld('fileHandler', fileHandler);
 
 export type WindowHandler = typeof windowHandler;
 export type DataHandler = typeof dataHandler;
 export type NetworkHandler = typeof networkHandler;
 export type WebsocketHandler = typeof websocketHandler;
+export type FileHandler = typeof fileHandler;
