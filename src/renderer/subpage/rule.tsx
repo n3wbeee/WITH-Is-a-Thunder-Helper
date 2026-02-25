@@ -20,21 +20,29 @@ function TriggerCard({
 	onDelete,
 	onTriggerChange,
 	onNameChange,
+	editingID,
+	setEditingID,
 }: {
 	item: Rule;
 	dragHandleProps: any;
 	onDelete: (id: string) => void;
 	onTriggerChange: (id: string, newTrigger: TriggerType) => void;
 	onNameChange: (id: string, newName: string) => void;
+	editingID: string | null;
+	setEditingID: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
 	return (
 		<div
-			className="h-16 rounded-2xl m-4 shrink-0 shadow relative flex group items-center p-2 pl-3 gap-2 bg-neutral-50 select-none
-			transition-colors hover:bg-blue-200"
+			className={`h-16 rounded-2xl m-4 shrink-0 shadow relative flex group items-center p-2 pl-3 gap-2 select-none
+			bg-neutral-50 transition-colors hover:bg-blue-200 ${editingID === item.id ? 'bg-blue-200' : ''}`}
 		>
-			<img src={edit} className="w-6 h-6 cursor-pointer" />
+			<img
+				src={edit}
+				className="w-6 h-6 cursor-pointer"
+				onClick={() => setEditingID(item.id)}
+			/>
 			{/* 规则名称和触发条件编辑区 */}
-			<div className="flex-1 h-full flex justify-center flex-col">
+			<div className="flex-1 h-full flex justify-center overflow-hidden flex-col">
 				<input
 					type="text"
 					value={item.name}
@@ -52,7 +60,7 @@ function TriggerCard({
 						<option
 							key={option}
 							value={option}
-							className="bg-neutral-50 transition-colors hover:bg-blue-200"
+							className="bg-neutral-50 text-neutral-500 transition-colors"
 						>
 							{option}
 						</option>
@@ -63,8 +71,8 @@ function TriggerCard({
 			{/* 删除图标 */}
 			<img
 				src={deleteIcon}
-				className="w-4 h-4 absolute	-right-1 -top-1 cursor-pointer
-				transition-opacity opacity-0 group-hover:opacity-100"
+				className={`w-4 h-4 absolute -right-1 -top-1 cursor-pointer
+				transition-opacity opacity-0 group-hover:opacity-100`}
 				onClick={() => onDelete(item.id)}
 			/>
 
@@ -79,8 +87,154 @@ function TriggerCard({
 	);
 }
 
+function TriggerContent({
+	setIsDialogOpen,
+	items,
+	setItems,
+	editingID,
+	setEditingID,
+}: {
+	setIsDialogOpen: (open: boolean) => void;
+	items: Rule[];
+	setItems: React.Dispatch<React.SetStateAction<Rule[]>>;
+	editingID: string | null;
+	setEditingID: React.Dispatch<React.SetStateAction<string | null>>;
+}) {
+	const addHandler = () => {
+		const newItem: Rule = {
+			name: '新建规则',
+			trigger: 'onAirbrakeOn',
+			action: [],
+			id: uuidv4(),
+		};
+		setItems([...items, newItem]);
+	};
+	const triggerChangeHandler = (id: string, newTrigger: TriggerType) => {
+		const newItems = items.map((item) => {
+			if (item.id === id) {
+				return { ...item, trigger: newTrigger };
+			}
+			return item;
+		});
+		setItems(newItems);
+	};
+	const nameChangeHandler = (id: string, newName: string) => {
+		const newItems = items.map((item) => {
+			if (item.id === id) {
+				return { ...item, name: newName };
+			}
+			return item;
+		});
+		setItems(newItems);
+	};
+	const deleteHandler = (id: string) => {
+		const newItems = items.filter((item) => item.id !== id);
+		setItems(newItems);
+	};
+
+	const dragHandler = (result: any) => {
+		if (!result.destination) return;
+
+		const newItems = Array.from(items);
+		const [reorderedItem] = newItems.splice(result.source.index, 1);
+		newItems.splice(result.destination.index, 0, reorderedItem);
+
+		setItems(newItems);
+	};
+
+	return (
+		<DragDropContext onDragEnd={dragHandler}>
+			<div className="w-64 h-full flex flex-col">
+				{/* 工具栏 */}
+				<div className="w-full h-8 flex items-center justify-end p-2 gap-2 bg-neutral-50">
+					<img
+						src={save}
+						className="cursor-pointer"
+						onClick={() => {
+							setIsDialogOpen(true);
+						}}
+					/>
+					<img
+						src={create}
+						className="cursor-pointer"
+						onClick={addHandler}
+					/>
+				</div>
+				<div className="bg-neutral-200 w-full h-px" />
+
+				{/* 规则卡片展示区 byd怎么这么能套娃 */}
+				<Droppable droppableId="rule-list">
+					{(provided, snapshot) => (
+						<div
+							className="flex flex-col flex-1 overflow-auto"
+							ref={provided.innerRef}
+							{...provided.droppableProps}
+						>
+							{items.map((item, index) => (
+								<Draggable
+									key={item.id}
+									draggableId={item.id}
+									index={index}
+								>
+									{(provided, snapshot) => (
+										<div
+											ref={provided.innerRef}
+											{...provided.draggableProps}
+										>
+											<TriggerCard
+												item={item}
+												dragHandleProps={
+													provided.dragHandleProps
+												}
+												onDelete={deleteHandler}
+												onTriggerChange={
+													triggerChangeHandler
+												}
+												onNameChange={nameChangeHandler}
+												editingID={editingID}
+												setEditingID={setEditingID}
+											/>
+										</div>
+									)}
+								</Draggable>
+							))}
+							{provided.placeholder}
+						</div>
+					)}
+				</Droppable>
+			</div>
+		</DragDropContext>
+	);
+}
+
+function ActionCard() {}
+
+function ActionContent({ item }: { item: Rule | undefined }) {
+	return (
+		<div className="flex-1 h-full">
+			{/* 工具栏 */}
+			<div className="w-full h-8 flex items-center justify-end p-2 gap-2 bg-neutral-50">
+				<img src={create} className="cursor-pointer" />
+			</div>
+			<div className="bg-neutral-200 w-full h-px" />
+
+			{/* 规则编辑区 */}
+			{!item ? (
+				<div className="flex flex-1 h-full flex-col justify-center items-center">
+					<p className="text-neutral-400 text-lg m-2 select-none">
+						选择规则以编辑
+					</p>
+				</div>
+			) : (
+				<div></div>
+			)}
+		</div>
+	);
+}
+
 function RuleContent() {
 	const [items, setItems] = useState<Rule[]>([]);
+	const [editingID, setEditingID] = useState<string | null>(null);
 
 	const initialItemsRef = useRef(JSON.stringify(items));
 	const [isDirty, setIsDirty] = useState(false);
@@ -166,157 +320,68 @@ function RuleContent() {
 			blocker.proceed?.();
 		}
 	};
-
-	// item操作相关
-	const addHandler = () => {
-		const newItem: Rule = {
-			name: '新建规则',
-			trigger: 'onAirbrakeOn',
-			action: [],
-			id: uuidv4(),
-		};
-		setItems([...items, newItem]);
-	};
-	const triggerChangeHandler = (id: string, newTrigger: TriggerType) => {
-		const newItems = items.map((item) => {
-			if (item.id === id) {
-				return { ...item, trigger: newTrigger };
+	useEffect(() => {
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+				e.preventDefault();
+				setIsDialogOpen(true);
 			}
-			return item;
 		});
-		setItems(newItems);
-	};
-	const nameChangeHandler = (id: string, newName: string) => {
-		const newItems = items.map((item) => {
-			if (item.id === id) {
-				return { ...item, name: newName };
-			}
-			return item;
-		});
-		setItems(newItems);
-	};
-	const deleteHandler = (id: string) => {
-		const newItems = items.filter((item) => item.id !== id);
-		setItems(newItems);
-	};
-	const dragHandler = (result: any) => {
-		if (!result.destination) return;
-
-		const newItems = Array.from(items);
-		const [reorderedItem] = newItems.splice(result.source.index, 1);
-		newItems.splice(result.destination.index, 0, reorderedItem);
-
-		setItems(newItems);
-	};
+	}, []);
 
 	return (
-		<DragDropContext onDragEnd={dragHandler}>
-			<div className="relative flex flex-1 h-full overflow-hidden select-none">
-				{(isDialogOpen || blocker.state === 'blocked') && (
-					<div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25">
-						<div className="p-6 bg-white rounded-lg shadow-xl min-w-80">
-							<h2 className="text-lg font-bold text-neutral-900 mb-2">
-								{blocker.state === 'blocked'
-									? '未保存的更改'
-									: '确认保存'}
-							</h2>
-							<p className="text-neutral-700 mb-4">
-								{blocker.state === 'blocked'
-									? '您有未保存的更改，是否要保存？'
-									: '您确定要保存当前的规则配置吗？'}
-							</p>
-							<div className="flex justify-end gap-2">
+		<div className="relative flex flex-1 h-full overflow-hidden select-none">
+			{(isDialogOpen || blocker.state === 'blocked') && (
+				<div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25">
+					<div className="p-6 bg-white rounded-lg shadow-xl min-w-96">
+						<h2 className="text-lg font-bold text-neutral-900 mb-2">
+							{blocker.state === 'blocked'
+								? '未保存的更改'
+								: '确认保存'}
+						</h2>
+						<p className="text-neutral-700 mb-4">
+							{blocker.state === 'blocked'
+								? '您有未保存的更改，是否要保存？'
+								: '您确定要保存当前的规则配置吗？'}
+						</p>
+						<div className="flex justify-end gap-2">
+							<button
+								onClick={cancelSaveHandler}
+								className="px-4 py-2 text-white bg-gray-500 rounded transition-colors hover:bg-gray-600"
+							>
+								取消
+							</button>
+							{blocker.state === 'blocked' && (
 								<button
-									onClick={cancelSaveHandler}
-									className="px-4 py-2 text-white bg-gray-500 rounded transition-colors hover:bg-gray-600"
+									onClick={discardChangesHandler}
+									className="px-4 py-2 text-white bg-red-500 rounded transition-colors hover:bg-red-600"
 								>
-									取消
+									放弃更改
 								</button>
-								{blocker.state === 'blocked' && (
-									<button
-										onClick={discardChangesHandler}
-										className="px-4 py-2 text-white bg-red-500 rounded transition-colors hover:bg-red-600"
-									>
-										放弃更改
-									</button>
-								)}
-								<button
-									onClick={confirmSaveHandler}
-									className="px-4 py-2 text-white bg-blue-500 rounded transition-colors hover:bg-blue-600"
-								>
-									保存
-								</button>
-							</div>
+							)}
+							<button
+								onClick={confirmSaveHandler}
+								className="px-4 py-2 text-white bg-blue-500 rounded transition-colors hover:bg-blue-600"
+							>
+								保存
+							</button>
 						</div>
 					</div>
-				)}
-
-				{/* 规则页 */}
-				<div className="w-64 h-full flex flex-col">
-					{/* 工具栏 */}
-					<div className="w-full h-8 flex items-center justify-end p-2 gap-2 bg-neutral-50">
-						<img
-							src={save}
-							className="cursor-pointer"
-							onClick={() => {
-								setIsDialogOpen(true);
-							}}
-						/>
-						<img
-							src={create}
-							className="cursor-pointer"
-							onClick={addHandler}
-						/>
-					</div>
-					<div className="bg-neutral-200 w-full h-px" />
-
-					{/* 规则卡片展示区 byd怎么这么能套娃 */}
-					<Droppable droppableId="rule-list">
-						{(provided, snapshot) => (
-							<div
-								className="flex flex-col flex-1 overflow-auto"
-								ref={provided.innerRef}
-								{...provided.droppableProps}
-							>
-								{items.map((item, index) => (
-									<Draggable
-										key={item.id}
-										draggableId={item.id}
-										index={index}
-									>
-										{(provided, snapshot) => (
-											<div
-												ref={provided.innerRef}
-												{...provided.draggableProps}
-											>
-												<TriggerCard
-													item={item}
-													dragHandleProps={
-														provided.dragHandleProps
-													}
-													onDelete={deleteHandler}
-													onTriggerChange={
-														triggerChangeHandler
-													}
-													onNameChange={
-														nameChangeHandler
-													}
-												/>
-											</div>
-										)}
-									</Draggable>
-								))}
-								{provided.placeholder}
-							</div>
-						)}
-					</Droppable>
 				</div>
+			)}
 
-				<div className="bg-neutral-200 w-px h-full"></div>
+			<TriggerContent
+				setIsDialogOpen={setIsDialogOpen}
+				items={items}
+				setItems={setItems}
+				editingID={editingID}
+				setEditingID={setEditingID}
+			/>
 
-				<div className="flex-1"></div>
-			</div>
-		</DragDropContext>
+			<div className="bg-neutral-200 w-px h-full"></div>
+
+			<ActionContent item={items.find((item) => item.id === editingID)} />
+		</div>
 	);
 }
 

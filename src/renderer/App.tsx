@@ -9,6 +9,7 @@ import {
 
 import Link from './subpage/link';
 import Rule from './subpage/rule';
+import Settings from './subpage/settings';
 
 import { useEffect, useState } from 'react';
 
@@ -19,32 +20,32 @@ import logo from '../../assets/logo.png';
 
 import './styleComplied.css';
 
-function Sidebar() {
-	const location = useLocation();
-	const navigate = useNavigate();
-
-	function Button({
-		text,
-		status,
-		onClick,
-	}: {
-		text: string;
-		status: boolean;
-		onClick?: () => void;
-	}) {
-		return (
-			<div
-				className={`w-full h-12 rounded-xl select-none flex items-center p-4 transition-colors cursor-pointer
+function Button({
+	text,
+	status,
+	onClick,
+}: {
+	text: string;
+	status: boolean;
+	onClick?: () => void;
+}) {
+	return (
+		<div
+			className={`w-full h-12 rounded-xl select-none flex items-center p-4 transition-colors cursor-pointer
 				${status ? 'bg-blue-500 text-neutral-100' : 'hover:bg-blue-400 hover:text-neutral-100'}
 				active:bg-blue-600 active:text-neutral-100
 				`}
-				onClick={onClick}
-				id={text}
-			>
-				{text}
-			</div>
-		);
-	}
+			onClick={onClick}
+			id={text}
+		>
+			{text}
+		</div>
+	);
+}
+
+function Sidebar() {
+	const location = useLocation();
+	const navigate = useNavigate();
 
 	return (
 		<div className="w-48 h-full bg-neutral-50 flex flex-col items-center p-4 gap-4">
@@ -64,6 +65,13 @@ function Sidebar() {
 				status={location.pathname === '/rule'}
 				onClick={() => {
 					navigate('/rule');
+				}}
+			/>
+			<Button
+				text="设置"
+				status={location.pathname === '/settings'}
+				onClick={() => {
+					navigate('/settings');
 				}}
 			/>
 		</div>
@@ -143,6 +151,10 @@ const router = createMemoryRouter([
 			{
 				path: 'rule',
 				element: <Rule />,
+			},
+			{
+				path: 'settings',
+				element: <Settings />,
 			},
 		],
 	},

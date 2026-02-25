@@ -251,6 +251,6 @@ app.whenReady()
 					mainWindow?.webContents.send('update-state', null);
 					console.error(error);
 				});
-		}, 100000);
+		}, 1000);
 	})
 	.catch(console.log);
