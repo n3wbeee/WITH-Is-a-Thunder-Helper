@@ -10,9 +10,30 @@ import deleteIcon from '../../../assets/icons/delete.svg';
 import dragHandle from '../../../assets/icons/drag_handle.svg';
 import edit from '../../../assets/icons/edit.svg';
 
-import { Rule, TriggerType } from '../../interfaces.d';
+import { Action, ActionType, Rule, TriggerType } from '../../interfaces.d';
 
 const triggerOptions: TriggerType[] = ['onAirbrakeOn', 'onCriticalSpeed'];
+const triggerNameMap: Record<TriggerType, string> = {
+	onAirbrakeOn: '打开减速板',
+	onCriticalSpeed: '临界速度',
+};
+
+const actionOptions: ActionType[] = [
+	'clearQueue',
+	'setStrength',
+	'increaseStrength',
+	'decreaseStrength',
+	'setPulse',
+	'delay',
+];
+const actionNameMap: Record<ActionType, string> = {
+	clearQueue: '清空队列',
+	setStrength: '设置强度',
+	increaseStrength: '增加强度',
+	decreaseStrength: '减少强度',
+	setPulse: '设置脉冲',
+	delay: '延迟',
+};
 
 function TriggerCard({
 	item,
@@ -34,7 +55,7 @@ function TriggerCard({
 	return (
 		<div
 			className={`h-16 rounded-2xl m-4 shrink-0 shadow relative flex group items-center p-2 pl-3 gap-2 select-none
-			bg-neutral-50 transition-colors hover:bg-blue-200 ${editingID === item.id ? 'bg-blue-200' : ''}`}
+			transition-colors hover:bg-blue-200 ${editingID === item.id ? 'bg-blue-200' : 'bg-neutral-50'}`}
 		>
 			<img
 				src={edit}
@@ -62,7 +83,7 @@ function TriggerCard({
 							value={option}
 							className="bg-neutral-50 text-neutral-500 transition-colors"
 						>
-							{option}
+							{triggerNameMap[option]}
 						</option>
 					))}
 				</select>
@@ -104,7 +125,7 @@ function TriggerContent({
 		const newItem: Rule = {
 			name: '新建规则',
 			trigger: 'onAirbrakeOn',
-			action: [],
+			actions: [{ type: 'delay', params: 1000 }],
 			id: uuidv4(),
 		};
 		setItems([...items, newItem]);
@@ -207,7 +228,31 @@ function TriggerContent({
 	);
 }
 
-function ActionCard() {}
+function ActionCard({ action }: { action: Action }) {
+	return (
+		<div className="m-4 shrink-0 flex select-none gap-2 transition-colors hover:bg-blue-50">
+			<div className="h-full w-1 bg-blue-500" />
+
+			<div className="flex flex-col">
+				<select
+					value={action.type}
+					className="h-8 text-neutral-900 text-lg font-bold bg-transparent"
+				>
+					{actionOptions.map((option) => (
+						<option
+							key={option}
+							value={option}
+							className="bg-neutral-50 text-base text-neutral-500 transition-colors"
+						>
+							{actionNameMap[option]}
+						</option>
+					))}
+				</select>
+				<p className="text-neutral-500 pl-1">{action.params}</p>
+			</div>
+		</div>
+	);
+}
 
 function ActionContent({ item }: { item: Rule | undefined }) {
 	return (
@@ -220,13 +265,17 @@ function ActionContent({ item }: { item: Rule | undefined }) {
 
 			{/* 规则编辑区 */}
 			{!item ? (
-				<div className="flex flex-1 h-full flex-col justify-center items-center">
+				<div className="flex h-full flex-col justify-center items-center">
 					<p className="text-neutral-400 text-lg m-2 select-none">
 						选择规则以编辑
 					</p>
 				</div>
 			) : (
-				<div></div>
+				<div className="flex flex-1 h-full flex-col">
+					{item.actions?.map((action, index) => (
+						<ActionCard action={action} key={index} />
+					))}
+				</div>
 			)}
 		</div>
 	);
