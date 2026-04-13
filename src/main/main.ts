@@ -181,7 +181,7 @@ app.whenReady()
 					if (
 						network.family === 'IPv4' &&
 						!network.internal &&
-						network.address.includes('192')
+						network.netmask.includes('255.255')
 					) {
 						return network.address;
 					}

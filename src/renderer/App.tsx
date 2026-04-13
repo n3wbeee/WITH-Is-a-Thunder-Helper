@@ -49,9 +49,9 @@ function Sidebar() {
 
 	return (
 		<div className="w-48 h-full bg-neutral-50 flex flex-col items-center p-4 gap-4">
-			<div className="w-full h-24 flex items-center justify-center">
+			{/* <div className="w-full h-24 flex items-center justify-center">
 				<img src={logo} className="h-24 m-2" />
-			</div>
+			</div> */}
 
 			<Button
 				text="连接"

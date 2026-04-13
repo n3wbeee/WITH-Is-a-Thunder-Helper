@@ -248,7 +248,6 @@ function ActionCard({ action }: { action: Action }) {
 						</option>
 					))}
 				</select>
-				<p className="text-neutral-500 pl-1">{action.params}</p>
 			</div>
 		</div>
 	);
